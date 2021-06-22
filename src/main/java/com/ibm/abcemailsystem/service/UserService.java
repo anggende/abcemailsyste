@@ -32,14 +32,13 @@ public class UserService {
 		return repository.findById(id).get();
 	}
 	
-	public boolean deleteUser(Long id) {
+	public void deleteUser(Long id) throws UserNotFoundException {
 		Optional<User> user= repository.findById(id);
 		if (user.isPresent()) {
 			repository.deleteById(id);
-			return true;
 		}
 		else {
-			return false;
+			throw new UserNotFoundException("User not found.");
 		}
 	}
 	

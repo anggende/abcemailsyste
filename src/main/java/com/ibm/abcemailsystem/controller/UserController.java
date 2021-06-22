@@ -1,6 +1,8 @@
 package com.ibm.abcemailsystem.controller;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,9 +22,13 @@ import com.ibm.abcemailsystem.entity.User;
 import com.ibm.abcemailsystem.exceptions.UserNotFoundException;
 import com.ibm.abcemailsystem.service.UserService;
 
+import javassist.bytecode.stackmap.TypeData.ClassName;
+
 @RestController
 public class UserController {
 
+	private static final Logger LOGGER = Logger.getLogger(UserController.class.getName());
+	
 	@Autowired
 	private UserService userService;
 	
@@ -65,12 +71,14 @@ public class UserController {
 	
 	@DeleteMapping(value="/user/delete/{id}")
 	public ResponseEntity<String> deleteUser(@PathVariable("id") Long id) {
-		boolean isDeleted = userService.deleteUser(id);
-		if (isDeleted) {
+		try {
+			userService.deleteUser(id);
 			return ResponseEntity.ok("Account deleted.");
-		}
-		else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Account deletion failed.");
+		} catch (UserNotFoundException e) {
+			LOGGER.log(Level.INFO, "Account deletion failed due to: " + e.getMessage());
+			return ResponseEntity.badRequest().body(e.getMessage());
+		} finally {
+			LOGGER.log(Level.INFO, "called deleteUser");
 		}
 	}
 	
@@ -80,7 +88,10 @@ public class UserController {
 			userService.updateUser(id, user);
 			return ResponseEntity.ok("Account updated.");
 		} catch (UserNotFoundException e) {
+			LOGGER.log(Level.INFO, "User update failed due to: " + e.getMessage());
 			return ResponseEntity.badRequest().body(e.getMessage());
+		} finally {
+			LOGGER.log(Level.INFO, "called updateUser");
 		}
 	}
 	
