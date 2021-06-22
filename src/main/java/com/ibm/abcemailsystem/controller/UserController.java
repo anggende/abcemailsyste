@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ibm.abcemailsystem.bean.UserBean;
 import com.ibm.abcemailsystem.entity.User;
+import com.ibm.abcemailsystem.exceptions.UserNotFoundException;
 import com.ibm.abcemailsystem.service.UserService;
 
 @RestController
@@ -75,12 +76,11 @@ public class UserController {
 	
 	@PutMapping(value="/user/update/{id}")
 	public ResponseEntity<String> updateUser(@PathVariable("id") Long id, @RequestBody User user){
-		boolean isUpdated = userService.updateUser(id, user);
-		if (isUpdated) {
+		try {	
+			userService.updateUser(id, user);
 			return ResponseEntity.ok("Account updated.");
-		}
-		else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Account update failed.");
+		} catch (UserNotFoundException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
 	

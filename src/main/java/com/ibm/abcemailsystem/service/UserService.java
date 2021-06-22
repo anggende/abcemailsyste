@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ibm.abcemailsystem.entity.User;
+import com.ibm.abcemailsystem.exceptions.UserNotFoundException;
 import com.ibm.abcemailsystem.repository.UserRepository;
 
 @Service
@@ -42,7 +43,7 @@ public class UserService {
 		}
 	}
 	
-	public boolean updateUser(Long id, User updatedUserDetails) {
+	public void updateUser(Long id, User updatedUserDetails) throws UserNotFoundException {
 		Optional<User> user = repository.findById(id);
 		if (user.isPresent()) {
 			User updatedUser = getUserById(id);
@@ -52,10 +53,9 @@ public class UserService {
 			updatedUser.setEmail(updatedUserDetails.getEmail());
 			updatedUser.setPassword(updatedUserDetails.getPassword());
 			repository.save(updatedUser);
-			return true;
 		}
 		else {
-			return false;
+			throw new UserNotFoundException("User not found.");
 		}
 	}
 	
